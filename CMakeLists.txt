@@ -33,6 +33,8 @@ target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}/backends
 )
 
-add_executable(ColorBaker main.cpp)
+add_executable(ColorBaker 
+    src/main.cpp
+    src/domain/FolderService.cpp)
 
 target_link_libraries(ColorBaker PRIVATE imgui glfw opengl32)

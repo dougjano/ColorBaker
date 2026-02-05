@@ -2,6 +2,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
+#include "UI/UIComponents.h"
+#include "Domain/FolderService.h"
 
 
 
@@ -21,6 +23,8 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    UIComponents uiState;
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -28,14 +32,34 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        bool windowDisplay = true;
-        ImGui::ShowDemoWindow(&windowDisplay);
+        ImGui::Begin("Folder Settings");
+
+        if (ImGui::Button("Open Folder")) {
+            uiState.selectedFolder = "E:\\AI\\Niji";
+            uiState.hasFolderSelected = true;
+            uiState.imageFiles = FolderService::ScanForImages(uiState.selectedFolder);
+        }
+
+        if (uiState.hasFolderSelected) {
+            ImGui::Text("Selected: %s", uiState.selectedFolder.string().c_str());
+
+            if (ImGui::BeginListBox("Images Found")) {
+                for (const auto& file : uiState.imageFiles) {
+                    ImGui::Selectable(file.c_str());
+                }
+                ImGui::EndListBox();
+            } else {
+                ImGui::Text("No folder selected");
+            }
+        }
+
+        ImGui::End();
 
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0,0, display_w, display_h);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
