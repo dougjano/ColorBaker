@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "UI/UIComponents.h"
 #include "Domain/FolderService.h"
+#include <nfd.h>
 
 
 
@@ -25,6 +26,8 @@ int main() {
 
     UIComponents uiState;
 
+    NFD_Init();
+
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -35,9 +38,15 @@ int main() {
         ImGui::Begin("Folder Settings");
 
         if (ImGui::Button("Open Folder")) {
-            uiState.selectedFolder = "E:\\AI\\Niji";
-            uiState.hasFolderSelected = true;
-            uiState.imageFiles = FolderService::ScanForImages(uiState.selectedFolder);
+
+            nfdchar_t *outPath = NULL;
+            nfdresult_t chosenPath = NFD_PickFolder(&outPath, NULL);
+
+            if (chosenPath == NFD_OKAY) {
+                uiState.selectedFolder = outPath;
+                uiState.hasFolderSelected = true;
+                uiState.imageFiles = FolderService::ScanForImages(uiState.selectedFolder);
+            }
         }
 
         if (uiState.hasFolderSelected) {
@@ -66,6 +75,8 @@ int main() {
         glfwSwapBuffers(window);
 
     }
+
+    NFD_Quit();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();

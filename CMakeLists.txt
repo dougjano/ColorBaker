@@ -13,8 +13,14 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG 3.4)
 FetchContent_Declare(imgui GIT_REPOSITORY https://github.com/ocornut/imgui.git GIT_TAG v1.91.7)
+FetchContent_Declare(
+  nfd
+  GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+  GIT_TAG master
+)
 
 FetchContent_MakeAvailable(glfw imgui)
+FetchContent_MakeAvailable(nfd)
 
 add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -37,4 +43,4 @@ add_executable(ColorBaker
     src/main.cpp
     src/domain/FolderService.cpp)
 
-target_link_libraries(ColorBaker PRIVATE imgui glfw opengl32)
+target_link_libraries(ColorBaker PRIVATE imgui glfw opengl32 nfd)
