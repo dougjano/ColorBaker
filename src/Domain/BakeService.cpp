@@ -1,9 +1,11 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "BakeService.h"
 
 BakeResult BakeService::AnalyzeImage(const std::string& filePath) {
 
     int width, height, channels;
-    unsigned char* pixels = nullptr;
+    unsigned char* pixels = stbi_load(filePath.c_str(), &width, &height, &channels, 3);
 
     long redCount = 0,  greenCount = 0, blueCount = 0;
     int stride = 10;
@@ -28,6 +30,8 @@ BakeResult BakeService::AnalyzeImage(const std::string& filePath) {
     }
 
     float total = (float)(redCount + greenCount + blueCount);
+
+    stbi_image_free(pixels);
 
     return {redCount / total, greenCount / total, blueCount / total};
 

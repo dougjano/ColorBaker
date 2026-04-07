@@ -5,6 +5,7 @@
 #include "UI/UIComponents.h"
 #include "Domain/FolderService.h"
 #include <nfd.h>
+#include "Domain/BakeService.h"
 
 
 
@@ -35,7 +36,7 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Folder Settings");
+        ImGui::Begin("Folder Settings");        
 
         if (ImGui::Button("Open Folder")) {
 
@@ -53,13 +54,30 @@ int main() {
             ImGui::Text("Selected: %s", uiState.selectedFolder.string().c_str());
 
             if (ImGui::BeginListBox("Images Found")) {
-                for (const auto& file : uiState.imageFiles) {
-                    ImGui::Selectable(file.c_str());
+                for (int i = 0; i < uiState.imageFiles.size(); i++) {
+                    const bool isSelected = (uiState.selectedFileIndex == i);
+
+                    if (ImGui::Selectable(uiState.imageFiles[i].c_str(), isSelected)) {
+                        uiState.selectedFileIndex = i;
+                        std::string fullPath = (uiState.selectedFolder / uiState.imageFiles[i]).string();
+                        BakeResult res = BakeService::AnalyzeImage(fullPath);
+                        snprintf(uiState.analysisResult, sizeof(uiState.analysisResult), 
+                                "R: %.2f | G: %.2f | B: %.2f", res.red, res.green, res.blue);
+                    }
                 }
-                ImGui::EndListBox();
+
+            ImGui::EndListBox();
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Dominant Color Analysis:");
+            ImGui::InputText("##rgb_result", uiState.analysisResult, sizeof(uiState.analysisResult), ImGuiInputTextFlags_ReadOnly);
+
             } else {
                 ImGui::Text("No folder selected");
-            }
+            } 
         }
 
         ImGui::End();

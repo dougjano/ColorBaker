@@ -18,9 +18,15 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
   GIT_TAG master
 )
+FetchContent_Declare(
+  stb
+  GIT_REPOSITORY https://github.com/nothings/stb.git
+  GIT_TAG master
+)
 
 FetchContent_MakeAvailable(glfw imgui)
 FetchContent_MakeAvailable(nfd)
+FetchContent_MakeAvailable(stb)
 
 add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -37,10 +43,12 @@ target_link_libraries(imgui PUBLIC glfw)
 target_include_directories(imgui PUBLIC 
     ${imgui_SOURCE_DIR} 
     ${imgui_SOURCE_DIR}/backends
+    ${stb_SOURCE_DIR}
 )
 
 add_executable(ColorBaker 
     src/main.cpp
-    src/domain/FolderService.cpp)
+    src/domain/FolderService.cpp
+    src/Domain/BakeService.cpp)
 
 target_link_libraries(ColorBaker PRIVATE imgui glfw opengl32 nfd)
