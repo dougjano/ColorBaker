@@ -47,37 +47,40 @@ int main() {
                 uiState.selectedFolder = outPath;
                 uiState.hasFolderSelected = true;
                 uiState.imageFiles = FolderService::ScanForImages(uiState.selectedFolder);
+                uiState.bakedCache = BakeService::LoadMetadata(uiState.selectedFolder);
             }
         }
 
         if (uiState.hasFolderSelected) {
-            ImGui::Text("Selected: %s", uiState.selectedFolder.string().c_str());
+            if (ImGui::Button("Bake Folder")) {
+                BakeService::BakeFolder(uiState.selectedFolder, uiState.imageFiles);
+                uiState.bakedCache = BakeService::LoadMetadata(uiState.selectedFolder);
+            }
+
+            ImGui::Separator();
 
             if (ImGui::BeginListBox("Images Found")) {
                 for (int i = 0; i < uiState.imageFiles.size(); i++) {
+
                     const bool isSelected = (uiState.selectedFileIndex == i);
 
                     if (ImGui::Selectable(uiState.imageFiles[i].c_str(), isSelected)) {
                         uiState.selectedFileIndex = i;
-                        std::string fullPath = (uiState.selectedFolder / uiState.imageFiles[i]).string();
-                        BakeResult res = BakeService::AnalyzeImage(fullPath);
-                        snprintf(uiState.analysisResult, sizeof(uiState.analysisResult), 
-                                "R: %.2f | G: %.2f | B: %.2f", res.red, res.green, res.blue);
+
+                        auto it = uiState.bakedCache.find(uiState.imageFiles[i]);
+                        if (it != uiState.bakedCache.end()) {
+                            snprintf(uiState.analysisResult, sizeof(uiState.analysisResult), 
+                                    "R: %.2f | G: %.2f | B: %.2f", it->second.red, it->second.green, it->second.blue);
+                        } else {
+                            snprintf(uiState.analysisResult, sizeof(uiState.analysisResult), "Color Analysis Not Available");
+                        }
                     }
                 }
+                ImGui::EndListBox();
+            }
 
-            ImGui::EndListBox();
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-
-            ImGui::Text("Dominant Color Analysis:");
-            ImGui::InputText("##rgb_result", uiState.analysisResult, sizeof(uiState.analysisResult), ImGuiInputTextFlags_ReadOnly);
-
-            } else {
-                ImGui::Text("No folder selected");
-            } 
+            ImGui::Text("Result:");
+            ImGui::InputText("##rgb", uiState.analysisResult, sizeof(uiState.analysisResult), ImGuiInputTextFlags_ReadOnly);
         }
 
         ImGui::End();
